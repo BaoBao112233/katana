@@ -1,0 +1,40 @@
+# Custom fields để extract thông tin liên hệ từ response
+# Dùng với: katana -flc field-config.yaml -sf email,phone,linkedin
+
+- name: email
+  type: regex
+  part: response
+  regex:
+    # Email chuẩn
+    - '([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})'
+    # Email trong href="mailto:..."
+    - 'mailto:([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})'
+
+- name: phone
+  type: regex
+  part: response
+  regex:
+    # Số điện thoại Việt Nam (0xx, +84xx)
+    - '(\+84[\s\-]?[0-9]{9,10})'
+    - '(0[0-9]{9,10})'
+    # Số quốc tế
+    - '(\+[1-9][0-9][\s\-]?[0-9]{4,14})'
+
+- name: linkedin
+  type: regex
+  part: response
+  regex:
+    - '(https?://(?:www\.)?linkedin\.com/(?:in|company)/[a-zA-Z0-9_\-]+/?)'
+
+- name: facebook
+  type: regex
+  part: response
+  regex:
+    - '(https?://(?:www\.)?facebook\.com/[a-zA-Z0-9._\-]+/?)'
+
+- name: address
+  type: regex
+  part: body
+  regex:
+    # Địa chỉ có từ "Street", "Avenue", "Road", "Đường", "Quận", "Phường"
+    - '([0-9]+[^<>"]{5,80}(?:Street|St|Avenue|Ave|Road|Rd|Blvd|Đường|Phố|Quận|Phường|Huyện|TP\.|Thành phố)[^<>"]{0,60})'
