@@ -1,0 +1,130 @@
+# ============================================================
+# outreach/config.yaml — Cấu hình hệ thống tìm công ty & gửi mail
+# ============================================================
+
+# ----------------------------------------------------------
+# API Keys
+# ----------------------------------------------------------
+api:
+  # Google Custom Search API
+  # Lấy tại: https://developers.google.com/custom-search/v1/introduction
+  google_api_key: "YOUR_GOOGLE_API_KEY"
+  google_cx: "YOUR_CUSTOM_SEARCH_ENGINE_ID"   # Search Engine ID (cx)
+
+  # Hunter.io — tìm email theo domain
+  # Lấy tại: https://hunter.io/api-documentation
+  hunter_api_key: "YOUR_HUNTER_API_KEY"
+
+  # Apollo.io — tìm người + email theo domain (tuỳ chọn)
+  # Lấy tại: https://developer.apollo.io
+  apollo_api_key: ""  # để trống nếu không dùng
+
+# ----------------------------------------------------------
+# Tìm kiếm công ty (Google Search)
+# ----------------------------------------------------------
+search:
+  # Danh sách từ khoá tìm kiếm. Hệ thống sẽ lần lượt tìm từng query.
+  queries:
+    - "software company contact email site:linkedin.com/company"
+    - "fintech startup contact us email"
+    - "saas company official website contact"
+    - "e-commerce company contact email worldwide"
+  
+  # Số trang kết quả mỗi query (mỗi trang = 10 kết quả)
+  pages_per_query: 5
+  
+  # Bộ lọc quốc gia (để trống = toàn thế giới)
+  # Ví dụ: "us", "gb", "de", "fr", "sg", "vn"
+  country: ""
+
+# ----------------------------------------------------------
+# Crawl website (katana)
+# ----------------------------------------------------------
+crawler:
+  # Đường dẫn đến binary katana
+  katana_binary: "../katana"
+  
+  # Độ sâu crawl
+  depth: 3
+  
+  # Số request đồng thời
+  concurrency: 5
+  
+  # Rate limit (request/giây)
+  rate_limit: 20
+  
+  # Timeout (giây)
+  timeout: 15
+  
+  # Dùng headless browser (chậm hơn nhưng crawl được JS)
+  headless: false
+
+# ----------------------------------------------------------
+# Hunter.io — tìm email theo domain
+# ----------------------------------------------------------
+hunter:
+  # Số email tối đa lấy từ Hunter.io mỗi domain
+  limit: 5
+  
+  # Chỉ lấy email đã verify
+  require_verified: false
+  
+  # Loại email ưu tiên: "personal" | "generic" | ""
+  type_filter: ""
+
+# ----------------------------------------------------------
+# Gửi email (Gmail / Outlook SMTP)
+# ----------------------------------------------------------
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  use_tls: true
+  
+  # Tài khoản gửi
+  sender_email: "your_email@gmail.com"
+  sender_name: "Your Name"
+  
+  # Với Gmail: dùng App Password (không phải mật khẩu thường)
+  # Hướng dẫn: https://support.google.com/accounts/answer/185833
+  password: "YOUR_GMAIL_APP_PASSWORD"
+  
+  # Delay giữa các email (giây) — tránh bị block
+  delay_between_emails: 5
+  
+  # Số email tối đa mỗi ngày
+  daily_limit: 100
+
+# ----------------------------------------------------------
+# Nội dung email
+# ----------------------------------------------------------
+email_template:
+  subject: "Partnership Opportunity with {company_name}"
+  
+  # Dùng file template HTML trong thư mục email_sender/templates/
+  template_file: "default.html"
+  
+  # Biến có thể dùng trong template:
+  #   {company_name}  — tên công ty
+  #   {company_url}   — website công ty
+  #   {recipient_email} — địa chỉ email người nhận
+  #   {sender_name}   — tên người gửi
+  #   {sender_email}  — email người gửi
+  
+  # Thông tin người gửi (điền vào template)
+  your_name: "Your Full Name"
+  your_company: "Your Company Name"
+  your_title: "Your Job Title"
+  your_website: "https://yourwebsite.com"
+
+# ----------------------------------------------------------
+# Cơ sở dữ liệu (SQLite — lưu tại data/)
+# ----------------------------------------------------------
+database:
+  path: "data/outreach.db"
+
+# ----------------------------------------------------------
+# Logging
+# ----------------------------------------------------------
+logging:
+  level: "INFO"   # DEBUG | INFO | WARNING | ERROR
+  file: "data/outreach.log"

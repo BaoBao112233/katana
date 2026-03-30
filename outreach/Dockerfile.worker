@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Dockerfile.worker — Celery workers (includes Playwright chromium)
+# ─────────────────────────────────────────────────────────────────────────────
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# System deps for Playwright + Chromium
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    wget \
+    gnupg \
+    # Chromium runtime deps
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+    libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
+    libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright browser
+RUN playwright install chromium
+RUN playwright install-deps chromium
+
+COPY . .
+
+# Default: all queues (override in docker-compose per service)
+CMD ["celery", "-A", "workers.celery_app", "worker", "-Q", "crawl,ai,enrich,collect", "--concurrency=8", "--loglevel=info"]

@@ -1,0 +1,45 @@
+# ── Web framework ─────────────────────────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# ── Database ──────────────────────────────────────────────────────
+sqlalchemy[asyncio]>=2.0.28
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+
+# ── Queue / Workers ───────────────────────────────────────────────
+celery[redis]>=5.3.6
+redis>=5.0.1
+flower>=2.0.1
+kombu>=5.3.4
+
+# ── AI: LangChain + Groq ──────────────────────────────────────────
+langchain>=0.1.12
+langchain-groq>=0.1.3
+langchain-core>=0.1.30
+
+# ── Crawler ───────────────────────────────────────────────────────
+playwright>=1.42.0
+
+# ── HTTP clients ──────────────────────────────────────────────────
+httpx>=0.27.0
+aiohttp>=3.9.3
+requests>=2.31.0
+
+# ── Search ────────────────────────────────────────────────────────
+elasticsearch[async]>=8.12.0
+
+# ── Utilities ─────────────────────────────────────────────────────
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+tqdm>=4.66.1
+colorlog>=6.8.0
+jinja2>=3.1.3
+
+# ── Testing ───────────────────────────────────────────────────────
+pytest>=8.1.0
+pytest-asyncio>=0.23.5
+pytest-mock>=3.12.0

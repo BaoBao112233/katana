@@ -1,0 +1,70 @@
+[
+  {
+    "domain": "stripe.com",
+    "is_company": true,
+    "confidence": 0.4,
+    "name": "Stripe",
+    "industry": null,
+    "country": null,
+    "size": null,
+    "emails": [
+      "jane.diaz@stripe.com"
+    ],
+    "social_links": {
+      "github": "https://github.com/stripe",
+      "youtube": "https://www.youtube.com/watch?v=eMSqlQMk480"
+    },
+    "heuristic_signals": [
+      "has_email",
+      "has_size",
+      "tech_keywords",
+      "has_pricing"
+    ]
+  },
+  {
+    "domain": "notion.so",
+    "is_company": true,
+    "confidence": 0.4,
+    "name": "The AI workspace that works for you.",
+    "industry": null,
+    "country": null,
+    "size": null,
+    "emails": [],
+    "social_links": {
+      "instagram": "https://www.instagram.com/notionhq/",
+      "twitter": "https://twitter.com/NotionHQ",
+      "linkedin": "https://www.linkedin.com/company/notionhq/",
+      "facebook": "https://www.facebook.com/NotionHQ/",
+      "youtube": "https://www.youtube.com/watch?v=BFlop4sP8Os"
+    },
+    "heuristic_signals": [
+      "has_size",
+      "tech_keywords",
+      "has_linkedin",
+      "about_language"
+    ]
+  },
+  {
+    "domain": "figma.com",
+    "is_company": true,
+    "confidence": 0.4,
+    "name": "Figma: The Collaborative Interface Design Tool",
+    "industry": null,
+    "country": null,
+    "size": null,
+    "emails": [],
+    "social_links": {
+      "linkedin": "https://www.linkedin.com/in/masaya-takizawa/",
+      "youtube": "https://www.youtube.com/@RaulMarin_Figma",
+      "twitter": "https://x.com/smee_leee",
+      "instagram": "https://www.instagram.com/figma",
+      "facebook": "https://www.facebook.com/figmadesign"
+    },
+    "heuristic_signals": [
+      "has_size",
+      "tech_keywords",
+      "has_linkedin",
+      "about_language"
+    ]
+  }
+]

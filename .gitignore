@@ -10,3 +10,5 @@ dist/
 .devcontainer
 .DS_Store
 .idea
+
+*/.env

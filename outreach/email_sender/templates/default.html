@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ subject }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
+    .container { max-width:600px; margin:40px auto; background:#fff; border-radius:8px;
+                 overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+    .header { background:#1a73e8; color:#fff; padding:28px 32px; }
+    .header h1 { margin:0; font-size:22px; }
+    .body { padding:32px; color:#333; line-height:1.7; }
+    .body p { margin:0 0 16px; }
+    .cta { display:inline-block; margin:12px 0 20px; padding:12px 28px;
+           background:#1a73e8; color:#fff!important; border-radius:5px;
+           text-decoration:none; font-weight:bold; }
+    .footer { background:#f0f0f0; padding:16px 32px; font-size:12px; color:#888; }
+    a { color:#1a73e8; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Partnership Opportunity</h1>
+  </div>
+  <div class="body">
+    <p>Dear {{ company_name }} Team,</p>
+
+    <p>
+      I hope this message finds you well. My name is <strong>{{ sender_name }}</strong>
+      from <strong>{{ your_company }}</strong>, and I'm reaching out because I believe
+      there's a genuine opportunity for collaboration between our organizations.
+    </p>
+
+    <p>
+      We specialize in [your value proposition — briefly describe what you offer], and
+      after reviewing <a href="{{ company_url }}">{{ company_name }}</a>'s work, I think
+      we could bring real value to your team.
+    </p>
+
+    <p>
+      I'd love to schedule a quick 20-minute call to explore whether there's a mutual fit.
+    </p>
+
+    <a class="cta" href="mailto:{{ sender_email }}?subject=RE: Partnership with {{ company_name }}">
+      Reply to this email
+    </a>
+
+    <p>Looking forward to connecting!</p>
+
+    <p>
+      Best regards,<br/>
+      <strong>{{ sender_name }}</strong><br/>
+      {{ your_title }}<br/>
+      {{ your_company }}<br/>
+      <a href="{{ your_website }}">{{ your_website }}</a>
+    </p>
+  </div>
+  <div class="footer">
+    You received this email because we believe your company might benefit from what we offer.
+    If you'd prefer not to hear from us, simply reply with "unsubscribe" and we'll remove you immediately.
+  </div>
+</div>
+</body>
+</html>

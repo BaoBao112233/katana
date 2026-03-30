@@ -1,0 +1,196 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Company Database — Full Stack
+#
+# Services:
+#   postgres      — primary data store
+#   redis         — Celery broker + cache
+#   elasticsearch — full-text search
+#   api           — FastAPI SaaS app
+#   worker-crawl  — Playwright crawler workers
+#   worker-ai     — AI classifier workers (LangChain + Groq)
+#   worker-enrich — Enrichment workers (Hunter.io)
+#   beat          — Celery Beat (scheduler)
+#   flower        — Celery monitoring UI
+#   kibana        — Elasticsearch dashboard (optional, dev only)
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-common-env: &common-env
+  DATABASE_URL: "postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-secret}@postgres:5432/companydb"
+  DATABASE_URL_SYNC: "postgresql://postgres:${POSTGRES_PASSWORD:-secret}@postgres:5432/companydb"
+  REDIS_URL: "redis://redis:6379/0"
+  CELERY_BROKER_URL: "redis://redis:6379/1"
+  CELERY_RESULT_BACKEND: "redis://redis:6379/2"
+  ELASTICSEARCH_URL: "http://elasticsearch:9200"
+  GROQ_API_KEY: "${GROQ_API_KEY}"
+  GROQ_MODEL: "${GROQ_MODEL:-openai/GPT-OSS-20B}"
+  HUNTER_API_KEY: "${HUNTER_API_KEY}"
+  GOOGLE_MAPS_API_KEY: "${GOOGLE_MAPS_API_KEY}"
+  GOOGLE_API_KEY: "${GOOGLE_API_KEY}"
+  GOOGLE_CX: "${GOOGLE_CX}"
+
+x-worker-base: &worker-base
+  build:
+    context: .
+    dockerfile: Dockerfile.worker
+  environment:
+    <<: *common-env
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+  volumes:
+    - .:/app
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: companydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-secret}"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Elasticsearch ────────────────────────────────────────────────────────────
+  elasticsearch:
+    image: elasticsearch:8.12.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx1g"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  # ── FastAPI App ──────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      <<: *common-env
+      API_HOST: "0.0.0.0"
+      API_PORT: "8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Celery: Crawl Workers ────────────────────────────────────────────────────
+  worker-crawl:
+    <<: *worker-base
+    command: >
+      celery -A workers.celery_app worker
+        -Q crawl
+        --concurrency=8
+        --hostname=crawler@%h
+        --loglevel=info
+    shm_size: "512m"       # Playwright needs shared memory
+
+  # ── Celery: AI Workers ───────────────────────────────────────────────────────
+  worker-ai:
+    <<: *worker-base
+    command: >
+      celery -A workers.celery_app worker
+        -Q ai
+        --concurrency=4
+        --hostname=ai@%h
+        --loglevel=info
+
+  # ── Celery: Enrichment Workers ───────────────────────────────────────────────
+  worker-enrich:
+    <<: *worker-base
+    command: >
+      celery -A workers.celery_app worker
+        -Q enrich
+        --concurrency=8
+        --hostname=enrich@%h
+        --loglevel=info
+
+  # ── Celery: Collect Workers ──────────────────────────────────────────────────
+  worker-collect:
+    <<: *worker-base
+    command: >
+      celery -A workers.celery_app worker
+        -Q collect
+        --concurrency=2
+        --hostname=collect@%h
+        --loglevel=info
+
+  # ── Celery Beat (Scheduler) ──────────────────────────────────────────────────
+  beat:
+    <<: *worker-base
+    command: celery -A workers.celery_app beat --loglevel=info
+
+  # ── Flower (Monitoring) ──────────────────────────────────────────────────────
+  flower:
+    <<: *worker-base
+    command: celery -A workers.celery_app flower --port=5555
+    ports:
+      - "5555:5555"
+
+  # ── Kibana (Dev only — comment out in production) ────────────────────────────
+  kibana:
+    image: kibana:8.12.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    profiles:
+      - dev        # only starts with: docker compose --profile dev up
+
+volumes:
+  pg_data:
+  redis_data:
+  es_data:
